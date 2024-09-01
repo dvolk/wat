@@ -1,23 +1,23 @@
 import json
 import tempfile
 import subprocess
-import os
+import shlex
 
 import pyfzf
+import argh
 
 
-def main():
-    editor = os.environ.get("EDITOR")
+def main(editor=None, namespace=None):
     if not editor:
-        editor = ["bat", "--color", "always", "--paging", "always"]
+        editor = ["jless"]
     else:
         editor = [editor]
 
     fzf = pyfzf.FzfPrompt()
 
-    resources = subprocess.check_output(["kubectl", "api-resources"], text=True).split(
-        "\n"
-    )
+    resources = subprocess.check_output(
+        ["kubectl", "api-resources", "-o", "wide"], text=True
+    ).split("\n")
     resources = resources[1:-1]
 
     crds = subprocess.check_output(["kubectl", "get", "crd"], text=True).split("\n")
@@ -25,17 +25,22 @@ def main():
 
     all_resources = resources + crds
 
-    res_opts = [line.split(" ")[0] for line in all_resources]
+    # resource_verbs = {r.split()[0]: r.split()[-1].split(",") for r in resources}
+
+    res_opts = [line.split()[0] for line in all_resources]
 
     while sel_res := fzf.prompt(res_opts):
         sel_res = sel_res[0]
+        cmd = ["kubectl", "get", sel_res, "-o", "json"]
+        if namespace:
+            cmd = cmd + ["-n", namespace]
+        else:
+            cmd = cmd + ["-A"]
 
         try:
-            r = subprocess.check_output(
-                ["kubectl", "get", sel_res, "-A", "-o", "json"], text=True
-            )
+            print(shlex.join(cmd))
+            r = subprocess.check_output(cmd, text=True)
         except subprocess.CalledProcessError:
-            print(f"Failed to retrieve resources for {sel_res}. Skipping.")
             continue
 
         r = json.loads(r)["items"]
@@ -48,10 +53,10 @@ def main():
 
         while sel_obj := fzf.prompt(names):
             sel_obj = sel_obj[0]
-            namespace = item_namespaces[sel_obj]
+            item_namespace = item_namespaces[sel_obj]
 
-            if namespace:
-                command = [
+            if item_namespace:
+                cmd = [
                     "kubectl",
                     "get",
                     sel_res,
@@ -59,19 +64,19 @@ def main():
                     "-o",
                     "yaml",
                     "-n",
-                    namespace,
+                    item_namespace,
                 ]
             else:
-                command = ["kubectl", "get", sel_res, sel_obj, "-o", "yaml"]
+                cmd = ["kubectl", "get", sel_res, sel_obj, "-o", "yaml"]
 
             try:
-                r = subprocess.check_output(command, text=True)
+                print(shlex.join(cmd))
+                r = subprocess.check_output(cmd, text=True)
             except subprocess.CalledProcessError:
-                print(f"Failed to retrieve details for {sel_obj}. Skipping.")
                 continue
 
             with tempfile.NamedTemporaryFile(
-                mode="wt", delete=False, prefix=f"{sel_res}.{sel_obj}", suffix=".yaml"
+                mode="wt", delete=False, prefix=f"{sel_res}_{sel_obj}-", suffix=".yaml"
             ) as f:
                 f.write(r)
                 f.close()
@@ -79,4 +84,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    argh.dispatch_command(main)
+
