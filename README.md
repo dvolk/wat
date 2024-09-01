@@ -14,19 +14,22 @@ After selecting a kubernetes resource, it launches a pager showing the output of
 
 This allows for quick and efficient listing and viewing of all kubernetes resources (including custom resources).
 
-## requirements
+## Requirements
 
 - `kubectl` (https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
-- `bat` (`apt install bat`)
+- `jless` (https://github.com/PaulJuliusMartinez/jless/releases)
 - `fzf` (`apt install fzf`)
 - `pyfzf` (`pip3 install pyfzf`)
 
 ## Running
 
-`python3 wat.py`
+`python3 wat.py [--editor EDITOR] [--namespace NAMESPACE]`
 
 ## Notes
 
 In `fzf` menus, press `control-c` to go up a level.
 
-In the pager, press `q` to go back to the resource list.
+## Ideas for future work
+
+- Custom narrower with table view
+- Custom pager with actions such as edit and exec
