@@ -1,7 +1,7 @@
 # wat.py
 
 <p align="center">
-<img width="32%" src="https://i.imgur.com/tABEGLg.png"/><img width="32%" src="https://i.imgur.com/OMqZRXZ.png"/><img width="32%" src="https://i.imgur.com/UqWTWY1.png"/>
+<img width="32%" src="https://i.imgur.com/paeGhbf.png"/><img width="32%" src="https://i.imgur.com/2PFLncp.png"/><img width="32%" src="https://i.imgur.com/870o5Ln.png"/>
 </p>
 
 wat.py is a viewer for kubernetes resources
