@@ -1,0 +1,50 @@
+{% extends 'base.jinja2' %}
+
+{% block content %}
+
+  <h1 class="w3-center">{{ item_name }}</h1>
+
+  {% if item_dict.get("kind") == "Pod" %}
+
+    <div class="w3-container w3-blue w3-padding w3-round-large">
+      <h2>Containers</h2>
+
+      {% for container in item_dict.get("status", {}).get("containerStatuses", []) %}
+        {% set pod_namespace = item_dict.get("metadata", {}).get("namespace") %}
+        {% set pod_name = item_dict.get("metadata", {}).get("name") %}
+        {% set container_name = container.get("name") %}
+        <h3>
+          {{ pod_namespace }} /
+          {{ pod_name }} /
+          {{ container_name }}
+        </h3>
+        <p>
+          <a class="w3-button w3-green w3-round-large" href="{{ url_for('container_log', pod_namespace=pod_namespace, pod_name=pod_name, container_name=container_name) }}">container log</a>
+          </p>
+        <table class="w3-table w3-table-all w3-round">
+          {% for item, key in container.items() %}
+            <tr>
+              <td>
+                <b>{{ item }}</b>
+              </td>
+              <td>
+                {{ key }}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+        <br/>
+      {% endfor %}
+    </div>
+<br/>
+{% endif %}
+
+<div class="w3-container w3-light-gray w3-padding w3-round-large">
+  <h2>Data</h2>
+
+  {{ yaml_highlight(item_data) }}
+  <br/>
+</div>
+<br/>
+
+{% endblock %}

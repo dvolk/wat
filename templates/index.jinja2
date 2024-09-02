@@ -1,0 +1,18 @@
+{% extends 'base.jinja2' %}
+
+{% block content %}
+
+<h1 class="w3-center">Cluster resources</h1>
+
+<div class="w3-container w3-light-gray w3-round-large">
+    <h2>Resource list</h2>
+<ul class="w3-ul">
+    {% for resource_name in resource_names %}
+    <li>
+        <a href="{{ url_for('resource', resource_name=resource_name) }}">{{ resource_name }}</a>
+    </li>
+    {% endfor %}
+</ul>
+</div>
+<br/>
+{% endblock %}

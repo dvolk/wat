@@ -1,0 +1,46 @@
+{% extends 'base.jinja2' %}
+
+{% block content %}
+
+  <h1 class="w3-center">{{ resource_name }}</h1>
+
+  <div class="w3-container w3-light-gray w3-round-large">
+  <h2>{{ resource_name }} list</h2>
+  <ul class="w3-ul">
+    {% for item_name in item_names %}
+      <li>
+        {% set item_namespace = item_namespaces[item_name] %}
+        <a href="{{ url_for('item', resource_name=resource_name, item_name=item_name, item_namespace=item_namespace) }}">{{ item_name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  <br/>
+  </div>
+  <br/>
+
+
+  {% if resource_name == "pods" %}
+    <div class="w3-container w3-blue w3-round-large">
+      <h2>container status</h2>
+      <table class="w3-table-all">
+        {% for item in items_data %}
+          {% for container_status in item.get("status", {}).get("containerStatuses", []) %}
+            <tr>
+              <td>
+                {{ item.get("metadata", {}).get("namespace") }} /
+                {{ item.get("metadata", {}).get("name") }} /
+                {{ container_status.get("name") }}
+                </td>
+                <td>
+                  {{ (container_status.get("state", {}).keys()|list)[0] }}
+                </td>
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </table>
+      <br/>
+    </div>
+    <br/>
+  {% endif %}
+
+{% endblock %}
